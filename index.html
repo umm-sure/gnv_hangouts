@@ -56,23 +56,29 @@
       }
     </style>
 
-    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/dark/main.css" />
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
     <script src="https://js.arcgis.com/4.29/"></script>
 
     <script>
       require([
         "esri/Map",
+        "esri/config",
         "esri/views/MapView",
-        "esri/layers/FeatureLayer"
+        "esri/layers/FeatureLayer",
+        "esri/widgets/Legend"
       ], function(
-        Map, MapView, FeatureLayer
+        Map, esriConfig, MapView, FeatureLayer, Legend
       ) {
+
+        esriConfig.apiKey = "AAPK22e4ec34fd14421696e81cb44e3f740bq_B9x_-ncR2mCNbS5aJ79C1YtB1mLlY3p6SmzQokYXrnWWonbLTSnaTCoxgUFig2";
+
         // get layer from online portal
         const layer = new FeatureLayer({
           portalItem: {
               id: "ae2d7880ba9a45629ed93439032b8a85"
           },
-          outFields: ["*"]
+          outFields: ["*"],
+          opacity: 0
         });
         // setup the map
         const map = new Map({
@@ -86,6 +92,104 @@
           zoom: 13,
           map: map // References the map object
         });
+
+        const natureRenderer = {
+            "type": "simple",
+            "symbol": {
+              "type": "picture-marker",
+              "url": "https://raw.githubusercontent.com/umm-sure/gnv_hangouts/main/outline_forest_black_18dp.png",
+              "width": "24px",
+              "height": "24px"
+              }
+            }
+
+        const nature = new FeatureLayer({
+            url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/survey123_b335181255464038a2c42df1ea0ee3dd_results/FeatureServer",
+            renderer: natureRenderer,
+            definitionExpression: "type_of_spot = 'Nature'"
+          });
+
+        map.add(nature);
+
+        const chillRenderer = {
+            "type": "simple",
+            "symbol": {
+              "type": "picture-marker",
+              "url": "https://raw.githubusercontent.com/umm-sure/gnv_hangouts/main/outline_local_cafe_black_18dp.png",
+              "width": "24px",
+              "height": "24px"
+              }
+            }
+
+        const chill = new FeatureLayer({
+            url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/survey123_b335181255464038a2c42df1ea0ee3dd_results/FeatureServer",
+            renderer: chillRenderer,
+            definitionExpression: "type_of_spot = 'Chill'"
+          });
+
+        map.add(chill);
+
+        const studyRenderer = {
+            "type": "simple",
+            "symbol": {
+              "type": "picture-marker",
+              "url": "https://raw.githubusercontent.com/umm-sure/gnv_hangouts/main/outline_local_library_black_18dp.png",
+              "width": "24px",
+              "height": "24px"
+              }
+            }
+
+        const study = new FeatureLayer({
+            url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/survey123_b335181255464038a2c42df1ea0ee3dd_results/FeatureServer",
+            renderer: studyRenderer,
+            definitionExpression: "type_of_spot = 'Study'"
+          });
+
+        map.add(study);
+
+        const foodRenderer = {
+            "type": "simple",
+            "symbol": {
+              "type": "picture-marker",
+              "url": "https://raw.githubusercontent.com/umm-sure/gnv_hangouts/main/outline_dining_black_18dp.png",
+              "width": "24px",
+              "height": "24px"
+              }
+            }
+
+        const food = new FeatureLayer({
+            url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/survey123_b335181255464038a2c42df1ea0ee3dd_results/FeatureServer",
+            renderer: foodRenderer,
+            definitionExpression: "type_of_spot = 'Food'"
+          });
+
+        map.add(food);
+
+        let legend = new Legend({
+          view: view,
+          layout: 'side-by-side',
+          layerInfos: [
+            {
+              layer: chill,
+              title: 'Chill'
+            },
+            {
+              layer: nature,
+              title: 'Nature'
+            },
+            {
+              layer: study,
+              title: 'Study'
+            },
+            {
+              layer: food,
+              title: 'Food'
+            }
+          ]
+        });
+
+        view.ui.add(legend, "bottom-right");
+
         let highlight;
 
         view.on("click", function(event) {
@@ -96,7 +200,6 @@
         function queryFeatures(screenPoint) {
           const point = view.toMap(screenPoint);
 
-          // Query the for the object ids within 800m from where the user clicked
           layer.queryObjectIds({
             geometry: point,
             spatialRelationship: "intersects",
@@ -119,7 +222,7 @@
             });
             // Query the for the attachments from the object ids found
             return layer.queryAttachments({
-              attachmentTypes: ["image/jpeg"],
+              attachmentTypes: ["image/jpeg", "image/png"],
               objectIds: objectIds
             });
           })
@@ -152,7 +255,7 @@
         function showMessage(){
           clearMap();
           const infoP = document.createElement("p");
-          infoP.innerHTML = "<b>There are no tree image/jpeg attachments located in your query area. Please click within the feature layer to get results.</b>";
+          infoP.innerHTML = "<b>There are no image/jpeg attachments located in your query area. Please click closer to a point with an image to get results.</b>";
           document.getElementById("queryResults").appendChild(infoP);
         }
 
