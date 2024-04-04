@@ -72,13 +72,19 @@
 
         esriConfig.apiKey = "AAPK22e4ec34fd14421696e81cb44e3f740bq_B9x_-ncR2mCNbS5aJ79C1YtB1mLlY3p6SmzQokYXrnWWonbLTSnaTCoxgUFig2";
 
+        const popups = {
+          "title": "How to Get to Spot",
+          "content": "<b>Description:</b> {description_of_how_to_reach_spot}"
+        }
+
         // get layer from online portal
         const layer = new FeatureLayer({
           portalItem: {
               id: "ae2d7880ba9a45629ed93439032b8a85"
           },
           outFields: ["*"],
-          opacity: 0
+          opacity: 0,
+          popopTemplate: popups
         });
         // setup the map
         const map = new Map({
@@ -232,7 +238,7 @@
             }
             if (Object.keys(attachmentsByFeatureId).length === 0){
               const infoP = document.createElement("p");
-              infoP.innerHTML = "<b>There are no listed hangout spots within that range, please </b>";
+              infoP.innerHTML = "<b>There are no image/jpeg attachments located in your query area. Please click closer to a point with an image to get results.</b>";
               document.getElementById("queryResults").appendChild(infoP);
             }
             // Display the attachments
